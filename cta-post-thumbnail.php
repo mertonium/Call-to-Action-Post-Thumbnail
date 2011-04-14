@@ -78,6 +78,7 @@ if (!class_exists('CtaPlugin')) {
 			add_filter('attachment_fields_to_edit', array($this, 'add_attachment_field'), 20, 2);
 			add_action('admin_init', array($this, 'enqueue_admin_scripts'));
 			add_action("wp_ajax_set-{$this->post_type}-{$this->id}-thumbnail", array($this, 'set_thumbnail'));
+			add_action('wp_ajax_set_link', array($this,'save_link'));
 		}
 
 		/**
@@ -222,6 +223,8 @@ if (!class_exists('CtaPlugin')) {
 		 */
 		private function post_thumbnail_html($thumbnail_id = NULL) {
 			global $content_width, $_wp_additional_image_sizes, $post_ID;
+			
+			$sponsor_link = get_post_meta($post_ID,'sponsor_link',true);
 
 			$set_thumbnail_link = sprintf('<p class="hide-if-no-js"><a title="%1$s" href="%2$s" id="set-%3$s-%4$s-thumbnail" class="thickbox">%%s</a></p>', esc_attr__( "Set {$this->label}" ), get_upload_iframe_src('image'), $this->post_type, $this->id);
 			$content = sprintf($set_thumbnail_link, esc_html__( "Set {$this->label}" ));
@@ -242,7 +245,7 @@ if (!class_exists('CtaPlugin')) {
 				$content_width = $old_content_width;
 				
 				// Extra field
-				$extra_html = '<label for="sponsor_link">Sponsor link:</label><input id="sponsor_link" type="text" /><a href="#" id="save_sponsor_link" onClick="CtaPluginSaveLink(); return false;">Save</a>';
+				$extra_html = '<label for="sponsor_link">Sponsor link:</label><input id="sponsor_link" type="text" value="'.$sponsor_link.'" /><a href="#" id="save_sponsor_link" onclick="CtaPluginSaveLink('.$post_ID.'); return false;">Save</a><span id="ctapt_status"></span>';
 				$content .= $extra_html;
 			}
 
@@ -277,6 +280,14 @@ if (!class_exists('CtaPlugin')) {
 			}
 
 			die('0');
+		}
+		
+		public function save_link() {
+			global $post_ID; // have to do this so get_upload_iframe_src() can grab it
+			$post_ID = intval($_POST['post_id']);
+			$sponsor_link = $_POST['sponsor_link'];
+			$updated = update_post_meta($post_ID,'sponsor_link', $sponsor_link);
+			die($updated);
 		}
 
 	}

@@ -11,14 +11,19 @@ function CtaPluginSetThumbnailID(thumb_id, id, post_type){
 
 function CtaPluginRemoveThumbnail(id, post_type, nonce){
 	jQuery.post(ajaxurl, {
-		action:'set-' + post_type + '-' + id + '-thumbnail', post_id: jQuery('#post_ID').val(), thumbnail_id: -1, _ajax_nonce: nonce, cookie: encodeURIComponent(document.cookie)
-	}, function(str){
-		if ( str == '0' ) {
-			alert( setPostThumbnailL10n.error );
-		} else {
-			CtaPluginSetThumbnailHTML(str, id, post_type);
+		action:'set-' + post_type + '-' + id + '-thumbnail', 
+		post_id: jQuery('#post_ID').val(), 
+		thumbnail_id: -1, 
+		_ajax_nonce: nonce, 
+		cookie: encodeURIComponent(document.cookie)
+		}, 
+		function(str){
+			if ( str == '0' ) {
+				alert( setPostThumbnailL10n.error );
+			} else {
+				CtaPluginSetThumbnailHTML(str, id, post_type);
+			}
 		}
-	}
 	);
 };
 
@@ -44,5 +49,24 @@ function CtaPluginSetAsThumbnail(thumb_id, id, post_type, nonce){
 			win.CtaPluginSetThumbnailHTML(str, id, post_type);
 		}
 	}
+	);
+}
+
+// This function saves the link to the post meta data
+function CtaPluginSaveLink(post_id, nonce) {
+	var link = jQuery('#sponsor_link').val();
+	jQuery('#save_sponsor_link').toggle();
+	jQuery('#ctapt_status').html(" Saving...").toggle(true);
+	
+	jQuery.post(ajaxurl, {
+		action:'set_link', 
+		post_id: jQuery('#post_ID').val(), 
+		sponsor_link: link,
+		_ajax_nonce: nonce
+		}, 
+		function(data, textStatus){
+			jQuery('#save_sponsor_link').toggle();
+			jQuery('#ctapt_status').html(' Success!').fadeOut(2000);
+		}
 	);
 }
